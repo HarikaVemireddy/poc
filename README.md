@@ -1,4 +1,4 @@
-# poc
+<img width="1917" height="1077" alt="login-preview" src="https://github.com/user-attachments/assets/8f877cf7-b46d-41ca-8a86-875658c78ed6" /># poc
 
 Login and signup forms — proof of concept.
 
@@ -7,6 +7,9 @@ Login and signup forms — proof of concept.
 Two standalone HTML pages with a terminal-themed, split-screen design:
 - Left panel: animated boot-sequence terminal, unique per page
 - Right panel: the actual form, with live inline validation
+
+![Login form](login-preview.png)
+![Signup form](signup-preview.png)
 
 ## Files
 
