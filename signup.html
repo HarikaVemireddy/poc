@@ -1,39 +1,361 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Sign Up</title>
-  <link rel="stylesheet" href="style.css">
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Create account</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #05070c;
+    --bg-panel: #0d1219;
+    --bg-card: #10161f;
+    --accent: #5eead4;
+    --amber: #fbbf24;
+    --text: #e6edf3;
+    --muted: #6b7684;
+    --border: #1c232d;
+    --error: #f47174;
+    --success: #86efac;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-void);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+  .terminal {
+    flex: 1;
+    background: var(--bg-panel);
+    background-image:
+      linear-gradient(rgba(94,234,212,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(94,234,212,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .terminal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--amber), transparent 60%);
+  }
+  .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--amber);
+    margin-bottom: 60px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--amber); box-shadow: 0 0 8px var(--amber); }
+  .console {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--muted);
+    max-width: 420px;
+  }
+  .console .prompt { color: var(--amber); }
+  .console .line { opacity: 0; animation: reveal 0.4s forwards; white-space: pre-wrap; }
+  .console .line:nth-child(1) { animation-delay: 0.2s; }
+  .console .line:nth-child(2) { animation-delay: 0.9s; }
+  .console .line:nth-child(3) { animation-delay: 1.6s; }
+  .console .line:nth-child(4) { animation-delay: 2.3s; }
+  @keyframes reveal { to { opacity: 1; } }
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 16px;
+    background: var(--amber);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .headline {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 30px;
+    font-weight: 500;
+    margin-top: 44px;
+    max-width: 380px;
+    line-height: 1.3;
+    color: var(--text);
+    opacity: 0;
+    animation: reveal 0.6s forwards;
+    animation-delay: 3.0s;
+  }
+  .headline span { color: var(--amber); }
+
+  .panel-form {
+    flex: 1;
+    background: var(--bg-void);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .form-wrap { width: 100%; max-width: 360px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+  form { display: flex; flex-direction: column; gap: 18px; }
+  .field { position: relative; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.03em;
+  }
+  .field input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 13px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input::placeholder { color: #3d4552; }
+  .field input:focus {
+    outline: none;
+    border-color: var(--amber);
+    box-shadow: 0 0 0 3px rgba(251,191,36,0.12);
+  }
+  .field.error input { border-color: var(--error); }
+  .field .msg { font-size: 12px; color: var(--error); margin-top: 6px; min-height: 14px; }
+  .toggle-pw {
+    position: absolute;
+    right: 14px;
+    top: 38px;
+    background: none;
+    border: none;
+    color: var(--muted);
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    cursor: pointer;
+    letter-spacing: 0.03em;
+  }
+  .toggle-pw:hover { color: var(--amber); }
+
+  .strength-track {
+    display: flex;
+    gap: 4px;
+    margin-top: 8px;
+  }
+  .strength-track .bar {
+    height: 4px;
+    flex: 1;
+    background: var(--border);
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+  .strength-label {
+    font-size: 11px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    margin-top: 6px;
+  }
+
+  button.submit {
+    margin-top: 6px;
+    background: var(--amber);
+    color: #3a2a02;
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+    letter-spacing: 0.02em;
+  }
+  button.submit:hover { background: #ffd166; }
+  button.submit:active { transform: scale(0.98); }
+
+  .foot { text-align: center; font-size: 14px; color: var(--muted); margin-top: 26px; }
+  .foot a { color: var(--amber); text-decoration: none; font-weight: 500; }
+
+  @media (max-width: 820px) {
+    body { flex-direction: column; }
+    .terminal { min-height: 260px; padding: 32px; }
+    .headline { font-size: 22px; }
+  }
+</style>
 </head>
 <body>
-  <div class="form-container">
-    <h2>Create Account</h2>
-    <form id="signupForm">
-      <label for="name">Full Name</label>
-      <input type="text" id="name" name="name" required>
-      <label for="email">Email</label>
-      <input type="email" id="email" name="email" required>
-      <label for="password">Password</label>
-      <input type="password" id="password" name="password" required minlength="6">
-      <label for="confirmPassword">Confirm Password</label>
-      <input type="password" id="confirmPassword" name="confirmPassword" required minlength="6">
-      <button type="submit">Sign Up</button>
-    </form>
-    <p>Already have an account? <a href="login.html">Login</a></p>
+
+  <div class="terminal">
+    <div class="brand"><span class="dot"></span>POC // AUTH</div>
+    <div class="console">
+      <div class="line"><span class="prompt">$</span> useradd --new</div>
+      <div class="line">&gt; profile: unassigned</div>
+      <div class="line"><span class="prompt">$</span> register --start</div>
+      <div class="line">&gt; awaiting details<span class="cursor"></span></div>
+    </div>
+    <div class="headline">Spin up your <span>account</span> in under a minute.</div>
   </div>
+
+  <div class="panel-form">
+    <div class="form-wrap">
+      <div class="eyebrow">New profile</div>
+      <h1>Create account</h1>
+      <p class="sub">Fill in your details to get started.</p>
+
+      <form id="signupForm" novalidate>
+        <div class="field" id="nameField">
+          <label for="name">Full name</label>
+          <input type="text" id="name" name="name" placeholder="Jane Doe" autocomplete="name">
+          <div class="msg" id="nameMsg"></div>
+        </div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email</label>
+          <input type="email" id="email" name="email" placeholder="you@example.com" autocomplete="email">
+          <div class="msg" id="emailMsg"></div>
+        </div>
+
+        <div class="field" id="passwordField">
+          <label for="password">Password</label>
+          <input type="password" id="password" name="password" placeholder="••••••••" autocomplete="new-password">
+          <button type="button" class="toggle-pw" id="togglePw">SHOW</button>
+          <div class="strength-track">
+            <div class="bar" id="bar1"></div>
+            <div class="bar" id="bar2"></div>
+            <div class="bar" id="bar3"></div>
+            <div class="bar" id="bar4"></div>
+          </div>
+          <div class="strength-label" id="strengthLabel">enter a password</div>
+          <div class="msg" id="passwordMsg"></div>
+        </div>
+
+        <div class="field" id="confirmField">
+          <label for="confirmPassword">Confirm password</label>
+          <input type="password" id="confirmPassword" name="confirmPassword" placeholder="••••••••" autocomplete="new-password">
+          <div class="msg" id="confirmMsg"></div>
+        </div>
+
+        <button type="submit" class="submit">Create account →</button>
+      </form>
+
+      <p class="foot">Already have an account? <a href="login.html">Sign in</a></p>
+    </div>
+  </div>
+
   <script>
-    document.getElementById('signupForm').addEventListener('submit', function(e) {
+    const togglePw = document.getElementById('togglePw');
+    const pwInput = document.getElementById('password');
+    togglePw.addEventListener('click', () => {
+      const isPw = pwInput.type === 'password';
+      pwInput.type = isPw ? 'text' : 'password';
+      togglePw.textContent = isPw ? 'HIDE' : 'SHOW';
+    });
+
+    const bars = [document.getElementById('bar1'), document.getElementById('bar2'), document.getElementById('bar3'), document.getElementById('bar4')];
+    const strengthLabel = document.getElementById('strengthLabel');
+    const strengthColors = ['#f47174', '#fbbf24', '#a3e635', '#86efac'];
+    const strengthText = ['weak', 'fair', 'good', 'strong'];
+
+    function scorePassword(pw) {
+      let score = 0;
+      if (pw.length >= 6) score++;
+      if (pw.length >= 10) score++;
+      if (/[A-Z]/.test(pw) && /[a-z]/.test(pw)) score++;
+      if (/[0-9]/.test(pw) && /[^A-Za-z0-9]/.test(pw)) score++;
+      return score;
+    }
+
+    pwInput.addEventListener('input', () => {
+      const pw = pwInput.value;
+      const score = pw.length === 0 ? 0 : Math.max(1, scorePassword(pw));
+      bars.forEach((bar, i) => {
+        bar.style.background = i < score ? strengthColors[score - 1] : 'var(--border)';
+      });
+      strengthLabel.textContent = pw.length === 0 ? 'enter a password' : strengthText[score - 1];
+      strengthLabel.style.color = pw.length === 0 ? 'var(--muted)' : strengthColors[score - 1];
+    });
+
+    const form = document.getElementById('signupForm');
+    const nameField = document.getElementById('nameField');
+    const emailField = document.getElementById('emailField');
+    const passwordField = document.getElementById('passwordField');
+    const confirmField = document.getElementById('confirmField');
+
+    function setError(field, msgEl, message) {
+      field.classList.add('error');
+      msgEl.textContent = message;
+    }
+    function clearError(field, msgEl) {
+      field.classList.remove('error');
+      msgEl.textContent = '';
+    }
+
+    form.addEventListener('submit', function (e) {
       e.preventDefault();
-      const name = document.getElementById('name').value;
-      const email = document.getElementById('email').value;
-      const password = document.getElementById('password').value;
+      let valid = true;
+
+      const name = document.getElementById('name').value.trim();
+      const email = document.getElementById('email').value.trim();
+      const password = pwInput.value;
       const confirmPassword = document.getElementById('confirmPassword').value;
-      if (password !== confirmPassword) {
-        alert('Passwords do not match');
-        return;
+
+      const nameMsg = document.getElementById('nameMsg');
+      const emailMsg = document.getElementById('emailMsg');
+      const passwordMsg = document.getElementById('passwordMsg');
+      const confirmMsg = document.getElementById('confirmMsg');
+
+      [[nameField, nameMsg], [emailField, emailMsg], [passwordField, passwordMsg], [confirmField, confirmMsg]]
+        .forEach(([f, m]) => clearError(f, m));
+
+      if (name.length < 2) {
+        setError(nameField, nameMsg, 'Enter your full name.');
+        valid = false;
       }
-      console.log('Signup attempt:', name, email);
-      alert('Signup submitted (demo only)');
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (!emailPattern.test(email)) {
+        setError(emailField, emailMsg, 'Enter a valid email address.');
+        valid = false;
+      }
+      if (password.length < 6) {
+        setError(passwordField, passwordMsg, 'Password must be at least 6 characters.');
+        valid = false;
+      }
+      if (confirmPassword !== password || confirmPassword.length === 0) {
+        setError(confirmField, confirmMsg, 'Passwords do not match.');
+        valid = false;
+      }
+
+      if (valid) {
+        alert('Sign up submitted — connect this to your backend API.');
+      }
     });
   </script>
 </body>
