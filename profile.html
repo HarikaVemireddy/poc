@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Profile Settings</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #05070c;
+    --bg-panel: #0d1219;
+    --bg-card: #10161f;
+    --accent: #60a5fa;
+    --accent-ink: #071a33;
+    --text: #e6edf3;
+    --muted: #6b7684;
+    --border: #1c232d;
+    --error: #f47174;
+    --success: #86efac;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-void);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+  .terminal {
+    flex: 1;
+    background: var(--bg-panel);
+    background-image:
+      linear-gradient(rgba(96,165,250,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(96,165,250,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .terminal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent 60%);
+  }
+  .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 60px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+  .console {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 14px;
+    line-height: 1.9;
+    color: var(--muted);
+    max-width: 420px;
+  }
+  .console .prompt { color: var(--accent); }
+  .console .line { opacity: 0; animation: reveal 0.4s forwards; white-space: pre-wrap; }
+  .console .line:nth-child(1) { animation-delay: 0.2s; }
+  .console .line:nth-child(2) { animation-delay: 0.9s; }
+  .console .line:nth-child(3) { animation-delay: 1.6s; }
+  .console .line:nth-child(4) { animation-delay: 2.3s; }
+  @keyframes reveal { to { opacity: 1; } }
+  .cursor {
+    display: inline-block;
+    width: 8px; height: 16px;
+    background: var(--accent);
+    animation: blink 1s step-end infinite;
+    vertical-align: middle;
+    margin-left: 2px;
+  }
+  @keyframes blink { 50% { opacity: 0; } }
+  .headline {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 30px;
+    font-weight: 500;
+    margin-top: 44px;
+    max-width: 380px;
+    line-height: 1.3;
+    color: var(--text);
+    opacity: 0;
+    animation: reveal 0.6s forwards;
+    animation-delay: 3.0s;
+  }
+  .headline span { color: var(--accent); }
+
+  .panel-form {
+    flex: 1;
+    background: var(--bg-void);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+    overflow-y: auto;
+  }
+  .form-wrap { width: 100%; max-width: 420px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h1 {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 28px;
+    font-weight: 500;
+    margin-bottom: 8px;
+  }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 32px; }
+
+  .avatar-row { display: flex; align-items: center; gap: 18px; margin-bottom: 32px; }
+  .avatar-circle {
+    width: 72px; height: 72px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--accent), #1c1533);
+    display: flex; align-items: center; justify-content: center;
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 24px; font-weight: 700; color: #04121f;
+    flex-shrink: 0;
+    overflow: hidden;
+    border: 2px solid var(--border);
+  }
+  .avatar-circle img { width: 100%; height: 100%; object-fit: cover; }
+  .avatar-actions { display: flex; flex-direction: column; gap: 8px; }
+  .avatar-actions input[type=file] { display: none; }
+  .upload-btn {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--accent);
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    padding: 8px 14px;
+    border-radius: 6px;
+    cursor: pointer;
+    width: fit-content;
+    transition: border-color .15s;
+  }
+  .upload-btn:hover { border-color: var(--accent); }
+  .avatar-hint { font-size: 11px; color: var(--muted); }
+
+  .section-label {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin: 28px 0 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  form { display: flex; flex-direction: column; gap: 20px; }
+  .row2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+  .field { position: relative; }
+  .field label {
+    display: block;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+    color: var(--muted);
+    margin-bottom: 8px;
+    letter-spacing: 0.03em;
+  }
+  .field input, .field select, .field textarea {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 13px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'Inter', sans-serif;
+    transition: border-color 0.15s, box-shadow 0.15s;
+    resize: vertical;
+  }
+  .field textarea { min-height: 80px; }
+  .field input::placeholder, .field textarea::placeholder { color: #3d4552; }
+  .field input:focus, .field select:focus, .field textarea:focus {
+    outline: none;
+    border-color: var(--accent);
+    box-shadow: 0 0 0 3px rgba(96,165,250,0.14);
+  }
+  .field.error input { border-color: var(--error); }
+  .field .msg { font-size: 12px; color: var(--error); margin-top: 6px; min-height: 14px; }
+
+  .toggle-item {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 12px 0;
+    border-bottom: 1px solid var(--border);
+  }
+  .toggle-item:last-child { border-bottom: none; }
+  .toggle-text .t-title { font-size: 14px; color: var(--text); }
+  .toggle-text .t-sub { font-size: 12px; color: var(--muted); margin-top: 2px; }
+  .switch { position: relative; width: 42px; height: 24px; flex-shrink: 0; }
+  .switch input { opacity: 0; width: 0; height: 0; }
+  .slider-toggle {
+    position: absolute; cursor: pointer; inset: 0;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 24px;
+    transition: 0.2s;
+  }
+  .slider-toggle::before {
+    content: '';
+    position: absolute;
+    height: 16px; width: 16px;
+    left: 3px; top: 3px;
+    background: var(--muted);
+    border-radius: 50%;
+    transition: 0.2s;
+  }
+  .switch input:checked + .slider-toggle { background: rgba(96,165,250,0.15); border-color: var(--accent); }
+  .switch input:checked + .slider-toggle::before { transform: translateX(18px); background: var(--accent); }
+
+  button.submit {
+    margin-top: 10px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+    letter-spacing: 0.02em;
+  }
+  button.submit:hover { background: #93c5fd; }
+  button.submit:active { transform: scale(0.98); }
+
+  .success-box {
+    display: none;
+    align-items: center;
+    gap: 10px;
+    background: rgba(134,239,172,0.08);
+    border: 1px solid rgba(134,239,172,0.3);
+    color: var(--success);
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 16px;
+  }
+  .success-box.show { display: flex; }
+
+  @media (max-width: 820px) {
+    body { flex-direction: column; }
+    .terminal { min-height: 220px; padding: 32px; }
+    .headline { font-size: 22px; }
+    .row2 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="terminal">
+    <div class="brand"><span class="dot"></span>POC // PROFILE</div>
+    <div class="console">
+      <div class="line"><span class="prompt">$</span> whoami</div>
+      <div class="line">&gt; user::authenticated</div>
+      <div class="line"><span class="prompt">$</span> settings --edit</div>
+      <div class="line">&gt; profile unlocked<span class="cursor"></span></div>
+    </div>
+    <div class="headline">Update your <span>profile</span> and preferences.</div>
+  </div>
+
+  <div class="panel-form">
+    <div class="form-wrap">
+      <div class="eyebrow">Account</div>
+      <h1>Profile settings</h1>
+      <p class="sub">Manage how you appear and how we reach you.</p>
+
+      <form id="profileForm" novalidate>
+        <div class="avatar-row">
+          <div class="avatar-circle" id="avatarCircle">JD</div>
+          <div class="avatar-actions">
+            <label class="upload-btn" for="avatarInput">Upload photo</label>
+            <input type="file" id="avatarInput" accept="image/*">
+            <span class="avatar-hint">PNG or JPG, max 2MB</span>
+          </div>
+        </div>
+
+        <div class="row2">
+          <div class="field" id="firstField">
+            <label for="firstName">First name</label>
+            <input type="text" id="firstName" placeholder="Jane" value="Jane">
+            <div class="msg" id="firstMsg"></div>
+          </div>
+          <div class="field" id="lastField">
+            <label for="lastName">Last name</label>
+            <input type="text" id="lastName" placeholder="Doe" value="Doe">
+            <div class="msg" id="lastMsg"></div>
+          </div>
+        </div>
+
+        <div class="field" id="emailField">
+          <label for="email">Email</label>
+          <input type="email" id="email" placeholder="you@example.com" value="jane.doe@example.com">
+          <div class="msg" id="emailMsg"></div>
+        </div>
+
+        <div class="field">
+          <label for="bio">Bio</label>
+          <textarea id="bio" placeholder="A short bio about you..."></textarea>
+        </div>
+
+        <div class="section-label">Notifications</div>
+        <div class="toggle-item">
+          <div class="toggle-text">
+            <div class="t-title">Email notifications</div>
+            <div class="t-sub">Product updates and account activity</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="toggle-item">
+          <div class="toggle-text">
+            <div class="t-title">SMS alerts</div>
+            <div class="t-sub">Critical security notices only</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox">
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+        <div class="toggle-item">
+          <div class="toggle-text">
+            <div class="t-title">Public profile</div>
+            <div class="t-sub">Make your profile visible to others</div>
+          </div>
+          <label class="switch">
+            <input type="checkbox" checked>
+            <span class="slider-toggle"></span>
+          </label>
+        </div>
+
+        <button type="submit" class="submit">Save changes</button>
+        <div class="success-box" id="successBox">✓ Profile updated successfully.</div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    const avatarInput = document.getElementById('avatarInput');
+    const avatarCircle = document.getElementById('avatarCircle');
+    avatarInput.addEventListener('change', () => {
+      const file = avatarInput.files[0];
+      if (file) {
+        const reader = new FileReader();
+        reader.onload = e => {
+          avatarCircle.innerHTML = `<img src="${e.target.result}" alt="avatar">`;
+        };
+        reader.readAsDataURL(file);
+      }
+    });
+
+    const firstName = document.getElementById('firstName');
+    const lastName = document.getElementById('lastName');
+    function updateInitials() {
+      const f = firstName.value.trim()[0] || '';
+      const l = lastName.value.trim()[0] || '';
+      if (!avatarCircle.querySelector('img')) {
+        avatarCircle.textContent = (f + l).toUpperCase() || 'JD';
+      }
+    }
+    firstName.addEventListener('input', updateInitials);
+    lastName.addEventListener('input', updateInitials);
+
+    const form = document.getElementById('profileForm');
+    const successBox = document.getElementById('successBox');
+
+    function setError(fieldId, msgId, message) {
+      document.getElementById(fieldId).classList.add('error');
+      document.getElementById(msgId).textContent = message;
+    }
+    function clearError(fieldId, msgId) {
+      document.getElementById(fieldId).classList.remove('error');
+      document.getElementById(msgId).textContent = '';
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      let valid = true;
+      successBox.classList.remove('show');
+
+      ['firstField','lastField','emailField'].forEach((f,i) => clearError(f, ['firstMsg','lastMsg','emailMsg'][i]));
+
+      const emailPattern = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+      if (firstName.value.trim().length < 1) { setError('firstField','firstMsg','Required.'); valid = false; }
+      if (lastName.value.trim().length < 1) { setError('lastField','lastMsg','Required.'); valid = false; }
+      if (!emailPattern.test(document.getElementById('email').value.trim())) {
+        setError('emailField','emailMsg','Enter a valid email address.'); valid = false;
+      }
+
+      if (valid) {
+        successBox.classList.add('show');
+      }
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Checkout</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #05070c;
+    --bg-panel: #0d1219;
+    --bg-card: #10161f;
+    --accent: #34d399;
+    --accent-ink: #04231a;
+    --text: #e6edf3;
+    --muted: #6b7684;
+    --border: #1c232d;
+    --error: #f47174;
+    --success: #86efac;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-void);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+  .terminal {
+    flex: 1;
+    background: var(--bg-panel);
+    background-image:
+      linear-gradient(rgba(52,211,153,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(52,211,153,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    padding: 48px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    position: relative;
+    overflow: hidden;
+    min-width: 0;
+  }
+  .terminal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent 60%);
+  }
+  .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  .card-preview {
+    width: 100%; max-width: 360px;
+    aspect-ratio: 1.586;
+    border-radius: 16px;
+    background: linear-gradient(135deg, #10161f, #0a0f16);
+    border: 1px solid var(--border);
+    padding: 24px;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    position: relative;
+    overflow: hidden;
+    box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+  }
+  .card-preview::after {
+    content: '';
+    position: absolute; top: -40%; right: -20%;
+    width: 220px; height: 220px; border-radius: 50%;
+    background: radial-gradient(circle, rgba(52,211,153,0.15), transparent 70%);
+  }
+  .card-top { display: flex; justify-content: space-between; align-items: flex-start; }
+  .chip { width: 40px; height: 30px; border-radius: 6px; background: linear-gradient(135deg, #d4af37, #f5e7a3); }
+  .card-brand { font-family: 'Space Grotesk', sans-serif; font-weight: 700; font-size: 14px; color: var(--accent); letter-spacing: 0.05em; }
+  .card-number { font-family: 'JetBrains Mono', monospace; font-size: 20px; letter-spacing: 0.12em; color: var(--text); margin: 18px 0; }
+  .card-bottom { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .card-bottom .card-name { color: var(--text); text-transform: uppercase; font-size: 13px; }
+
+  .console {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 13px;
+    line-height: 1.8;
+    color: var(--muted);
+    max-width: 380px;
+    margin-top: 32px;
+  }
+  .console .prompt { color: var(--accent); }
+  .console .line { opacity: 0; animation: reveal 0.4s forwards; }
+  .console .line:nth-child(1) { animation-delay: 0.2s; }
+  .console .line:nth-child(2) { animation-delay: 0.9s; }
+  @keyframes reveal { to { opacity: 1; } }
+
+  .panel-form {
+    flex: 1;
+    background: var(--bg-void);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    padding: 40px;
+  }
+  .form-wrap { width: 100%; max-width: 400px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h1 { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 500; margin-bottom: 8px; }
+  .sub { color: var(--muted); font-size: 14px; margin-bottom: 30px; }
+
+  .order-summary {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 14px 16px;
+    margin-bottom: 26px;
+    font-size: 13px;
+  }
+  .order-row { display: flex; justify-content: space-between; padding: 5px 0; color: var(--muted); }
+  .order-row.total { color: var(--text); font-weight: 600; border-top: 1px solid var(--border); margin-top: 6px; padding-top: 10px; font-family: 'JetBrains Mono', monospace; }
+  .order-row.total span:last-child { color: var(--accent); }
+
+  form { display: flex; flex-direction: column; gap: 18px; }
+  .row3 { display: grid; grid-template-columns: 2fr 1fr 1fr; gap: 12px; }
+  .field { position: relative; }
+  .field label { display: block; font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--muted); margin-bottom: 8px; letter-spacing: 0.03em; }
+  .field input {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 13px 14px;
+    color: var(--text);
+    font-size: 14px;
+    font-family: 'JetBrains Mono', monospace;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .field input::placeholder { color: #3d4552; }
+  .field input:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(52,211,153,0.14); }
+  .field.error input { border-color: var(--error); }
+  .field .msg { font-size: 12px; color: var(--error); margin-top: 6px; min-height: 14px; }
+
+  button.submit {
+    margin-top: 6px;
+    background: var(--accent);
+    color: var(--accent-ink);
+    border: none;
+    border-radius: 6px;
+    padding: 14px;
+    font-size: 14px;
+    font-weight: 600;
+    font-family: 'Space Grotesk', sans-serif;
+    cursor: pointer;
+    transition: transform 0.1s, background 0.15s;
+    letter-spacing: 0.02em;
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+  }
+  button.submit:hover { background: #6ee7b7; }
+  button.submit:active { transform: scale(0.98); }
+
+  .secure-note {
+    display: flex; align-items: center; justify-content: center; gap: 6px;
+    font-size: 12px; color: var(--muted); margin-top: 16px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .success-box {
+    display: none;
+    align-items: center; gap: 10px;
+    background: rgba(134,239,172,0.08);
+    border: 1px solid rgba(134,239,172,0.3);
+    color: var(--success);
+    padding: 14px 16px;
+    border-radius: 6px;
+    font-size: 13px;
+    font-family: 'JetBrains Mono', monospace;
+    margin-top: 16px;
+  }
+  .success-box.show { display: flex; }
+
+  @media (max-width: 820px) {
+    body { flex-direction: column; }
+    .terminal { min-height: 320px; padding: 32px; align-items: center; }
+    .row3 { grid-template-columns: 1fr; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="terminal">
+    <div class="brand"><span class="dot"></span>POC // PAY</div>
+    <div class="card-preview">
+      <div class="card-top">
+        <div class="chip"></div>
+        <div class="card-brand" id="cardBrand">CARD</div>
+      </div>
+      <div class="card-number" id="cardNumberPreview">•••• •••• •••• ••••</div>
+      <div class="card-bottom">
+        <div>
+          <div style="font-size:10px; opacity:0.7;">CARD HOLDER</div>
+          <div class="card-name" id="cardNamePreview">YOUR NAME</div>
+        </div>
+        <div>
+          <div style="font-size:10px; opacity:0.7;">EXPIRES</div>
+          <div id="cardExpPreview">MM/YY</div>
+        </div>
+      </div>
+    </div>
+    <div class="console">
+      <div class="line"><span class="prompt">$</span> checkout --secure</div>
+      <div class="line">&gt; tls handshake ok, ready for payment</div>
+    </div>
+  </div>
+
+  <div class="panel-form">
+    <div class="form-wrap">
+      <div class="eyebrow">Payment</div>
+      <h1>Checkout</h1>
+      <p class="sub">Enter your card details to complete the purchase.</p>
+
+      <div class="order-summary">
+        <div class="order-row"><span>Pro plan (monthly)</span><span>$18.00</span></div>
+        <div class="order-row"><span>Tax</span><span>$1.44</span></div>
+        <div class="order-row total"><span>Total due today</span><span>$19.44</span></div>
+      </div>
+
+      <form id="checkoutForm" novalidate>
+        <div class="field" id="nameField">
+          <label for="cardName">Name on card</label>
+          <input type="text" id="cardName" placeholder="Jane Doe" style="font-family:'Inter',sans-serif;">
+          <div class="msg" id="nameMsg"></div>
+        </div>
+
+        <div class="field" id="numberField">
+          <label for="cardNumber">Card number</label>
+          <input type="text" id="cardNumber" placeholder="1234 1234 1234 1234" maxlength="19" inputmode="numeric">
+          <div class="msg" id="numberMsg"></div>
+        </div>
+
+        <div class="row3">
+          <div class="field" id="expField">
+            <label for="cardExp">Expiry</label>
+            <input type="text" id="cardExp" placeholder="MM/YY" maxlength="5" inputmode="numeric">
+            <div class="msg" id="expMsg"></div>
+          </div>
+          <div class="field" id="cvcField">
+            <label for="cardCvc">CVC</label>
+            <input type="text" id="cardCvc" placeholder="123" maxlength="4" inputmode="numeric">
+            <div class="msg" id="cvcMsg"></div>
+          </div>
+          <div class="field" id="zipField">
+            <label for="cardZip">ZIP</label>
+            <input type="text" id="cardZip" placeholder="94103" maxlength="6" inputmode="numeric">
+            <div class="msg" id="zipMsg"></div>
+          </div>
+        </div>
+
+        <button type="submit" class="submit" id="payBtn">Pay $19.44 →</button>
+      </form>
+
+      <div class="secure-note">🔒 Payments are encrypted end-to-end</div>
+      <div class="success-box" id="successBox">✓ Payment successful — receipt sent to your email.</div>
+    </div>
+  </div>
+
+  <script>
+    const cardNumber = document.getElementById('cardNumber');
+    const cardName = document.getElementById('cardName');
+    const cardExp = document.getElementById('cardExp');
+    const cardBrand = document.getElementById('cardBrand');
+    const numPreview = document.getElementById('cardNumberPreview');
+    const namePreview = document.getElementById('cardNamePreview');
+    const expPreview = document.getElementById('cardExpPreview');
+
+    function detectBrand(num) {
+      if (/^4/.test(num)) return 'VISA';
+      if (/^5[1-5]/.test(num)) return 'MASTERCARD';
+      if (/^3[47]/.test(num)) return 'AMEX';
+      if (/^6(?:011|5)/.test(num)) return 'DISCOVER';
+      return 'CARD';
+    }
+
+    cardNumber.addEventListener('input', () => {
+      let digits = cardNumber.value.replace(/\D/g, '').slice(0, 16);
+      let formatted = digits.replace(/(.{4})/g, '$1 ').trim();
+      cardNumber.value = formatted;
+      cardBrand.textContent = digits ? detectBrand(digits) : 'CARD';
+      let preview = digits.padEnd(16, '•').replace(/(.{4})/g, '$1 ').trim();
+      numPreview.textContent = digits ? preview : '•••• •••• •••• ••••';
+    });
+
+    cardName.addEventListener('input', () => {
+      namePreview.textContent = cardName.value.trim().toUpperCase() || 'YOUR NAME';
+    });
+
+    cardExp.addEventListener('input', () => {
+      let digits = cardExp.value.replace(/\D/g, '').slice(0, 4);
+      if (digits.length > 2) digits = digits.slice(0,2) + '/' + digits.slice(2);
+      cardExp.value = digits;
+      expPreview.textContent = digits || 'MM/YY';
+    });
+
+    document.getElementById('cardCvc').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '');
+    });
+    document.getElementById('cardZip').addEventListener('input', function() {
+      this.value = this.value.replace(/\D/g, '');
+    });
+
+    const form = document.getElementById('checkoutForm');
+    const payBtn = document.getElementById('payBtn');
+    const successBox = document.getElementById('successBox');
+
+    function setError(fieldId, msgId, message) {
+      document.getElementById(fieldId).classList.add('error');
+      document.getElementById(msgId).textContent = message;
+    }
+    function clearError(fieldId, msgId) {
+      document.getElementById(fieldId).classList.remove('error');
+      document.getElementById(msgId).textContent = '';
+    }
+
+    form.addEventListener('submit', function (e) {
+      e.preventDefault();
+      let valid = true;
+      successBox.classList.remove('show');
+      ['nameField','numberField','expField','cvcField','zipField'].forEach((f,i) => {
+        clearError(f, ['nameMsg','numberMsg','expMsg','cvcMsg','zipMsg'][i]);
+      });
+
+      if (cardName.value.trim().length < 2) { setError('nameField','nameMsg','Enter the name on the card.'); valid = false; }
+      const digits = cardNumber.value.replace(/\D/g, '');
+      if (digits.length < 15) { setError('numberField','numberMsg','Enter a valid card number.'); valid = false; }
+      const exp = cardExp.value;
+      const [mm, yy] = exp.split('/');
+      if (!mm || !yy || +mm < 1 || +mm > 12 || yy.length !== 2) { setError('expField','expMsg','Invalid.'); valid = false; }
+      if (document.getElementById('cardCvc').value.length < 3) { setError('cvcField','cvcMsg','Invalid.'); valid = false; }
+      if (document.getElementById('cardZip').value.length < 5) { setError('zipField','zipMsg','Invalid.'); valid = false; }
+
+      if (valid) {
+        payBtn.disabled = true;
+        payBtn.textContent = 'Processing...';
+        setTimeout(() => {
+          payBtn.disabled = false;
+          payBtn.textContent = 'Pay $19.44 →';
+          successBox.classList.add('show');
+        }, 1100);
+      }
+    });
+  </script>
+</body>
+</html>

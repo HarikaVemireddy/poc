@@ -1,0 +1,317 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Search & Filter</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=JetBrains+Mono:wght@400;500&family=Inter:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg-void: #05070c;
+    --bg-panel: #0d1219;
+    --bg-card: #10161f;
+    --accent: #fb923c;
+    --accent-ink: #2a1305;
+    --text: #e6edf3;
+    --muted: #6b7684;
+    --border: #1c232d;
+    --error: #f47174;
+    --success: #86efac;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg-void);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+  }
+  .terminal {
+    flex: 0 0 340px;
+    background: var(--bg-panel);
+    background-image:
+      linear-gradient(rgba(251,146,60,0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(251,146,60,0.04) 1px, transparent 1px);
+    background-size: 28px 28px;
+    padding: 40px 32px;
+    position: relative;
+    overflow-y: auto;
+  }
+  .terminal::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 3px;
+    background: linear-gradient(90deg, var(--accent), transparent 60%);
+  }
+  .brand {
+    font-family: 'Space Grotesk', sans-serif;
+    font-size: 15px;
+    font-weight: 700;
+    letter-spacing: 0.06em;
+    color: var(--accent);
+    margin-bottom: 40px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .brand .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 8px var(--accent); }
+
+  .filter-group { margin-bottom: 28px; }
+  .filter-title {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 14px;
+  }
+  .checkbox-list { display: flex; flex-direction: column; gap: 10px; }
+  .checkbox-item { display: flex; align-items: center; justify-content: space-between; font-size: 13px; color: var(--text); cursor: pointer; }
+  .checkbox-item input { accent-color: var(--accent); width: 15px; height: 15px; }
+  .checkbox-item .count { color: var(--muted); font-family: 'JetBrains Mono', monospace; font-size: 11px; }
+
+  .price-range { display: flex; flex-direction: column; gap: 10px; }
+  .price-values { display: flex; justify-content: space-between; font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--accent); }
+  input[type=range] {
+    width: 100%;
+    accent-color: var(--accent);
+  }
+
+  .rating-list { display: flex; flex-direction: column; gap: 8px; }
+  .rating-item { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text); cursor: pointer; }
+  .rating-item input { accent-color: var(--accent); }
+  .stars { color: var(--accent); letter-spacing: 1px; }
+
+  .clear-btn {
+    width: 100%;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--muted);
+    padding: 10px;
+    border-radius: 6px;
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    cursor: pointer;
+    transition: border-color .15s, color .15s;
+  }
+  .clear-btn:hover { border-color: var(--accent); color: var(--text); }
+
+  .panel-form {
+    flex: 1;
+    background: var(--bg-void);
+    padding: 40px 48px;
+    overflow-y: auto;
+  }
+  .search-header { max-width: 720px; margin: 0 auto 30px; }
+  .eyebrow {
+    font-family: 'JetBrains Mono', monospace;
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    margin-bottom: 10px;
+  }
+  h1 { font-family: 'Space Grotesk', sans-serif; font-size: 26px; font-weight: 500; margin-bottom: 20px; }
+
+  .search-bar {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 12px 16px;
+    transition: border-color 0.15s, box-shadow 0.15s;
+  }
+  .search-bar:focus-within { border-color: var(--accent); box-shadow: 0 0 0 3px rgba(251,146,60,0.14); }
+  .search-bar input {
+    flex: 1; background: none; border: none; outline: none;
+    color: var(--text); font-size: 15px; font-family: 'Inter', sans-serif;
+  }
+  .search-bar input::placeholder { color: #3d4552; }
+  .search-icon { color: var(--muted); font-size: 15px; }
+
+  .sort-row { display: flex; align-items: center; justify-content: space-between; max-width: 720px; margin: 20px auto 16px; }
+  .result-count { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--muted); }
+  .result-count span { color: var(--accent); }
+  .sort-select {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    color: var(--text);
+    padding: 8px 12px;
+    border-radius: 6px;
+    font-size: 12px;
+    font-family: 'JetBrains Mono', monospace;
+  }
+
+  .results { max-width: 720px; margin: 0 auto; display: flex; flex-direction: column; gap: 10px; }
+  .result-card {
+    display: flex; justify-content: space-between; align-items: center;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 16px 18px;
+    transition: border-color 0.15s;
+  }
+  .result-card:hover { border-color: var(--accent); }
+  .result-name { font-family: 'Space Grotesk', sans-serif; font-size: 15px; font-weight: 500; }
+  .result-meta { font-size: 12px; color: var(--muted); margin-top: 3px; }
+  .result-price { font-family: 'JetBrains Mono', monospace; color: var(--accent); font-size: 15px; }
+  .empty-state { text-align: center; color: var(--muted); padding: 60px 0; font-family: 'JetBrains Mono', monospace; font-size: 13px; }
+
+  @media (max-width: 900px) {
+    body { flex-direction: column; }
+    .terminal { flex: none; width: 100%; }
+  }
+</style>
+</head>
+<body>
+
+  <div class="terminal">
+    <div class="brand"><span class="dot"></span>POC // FILTER</div>
+
+    <div class="filter-group">
+      <div class="filter-title">Category</div>
+      <div class="checkbox-list" id="categoryFilters">
+        <label class="checkbox-item"><span><input type="checkbox" value="Tools" checked> Tools</span><span class="count">18</span></label>
+        <label class="checkbox-item"><span><input type="checkbox" value="Templates" checked> Templates</span><span class="count">12</span></label>
+        <label class="checkbox-item"><span><input type="checkbox" value="Plugins" checked> Plugins</span><span class="count">9</span></label>
+        <label class="checkbox-item"><span><input type="checkbox" value="Themes" checked> Themes</span><span class="count">6</span></label>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-title">Max price</div>
+      <div class="price-range">
+        <input type="range" id="priceRange" min="0" max="200" value="200">
+        <div class="price-values"><span>$0</span><span id="priceVal">$200</span></div>
+      </div>
+    </div>
+
+    <div class="filter-group">
+      <div class="filter-title">Minimum rating</div>
+      <div class="rating-list" id="ratingFilters">
+        <label class="rating-item"><input type="radio" name="rating" value="0" checked> Any rating</label>
+        <label class="rating-item"><input type="radio" name="rating" value="3"> <span class="stars">★★★</span>&nbsp;& up</label>
+        <label class="rating-item"><input type="radio" name="rating" value="4"> <span class="stars">★★★★</span>&nbsp;& up</label>
+      </div>
+    </div>
+
+    <button class="clear-btn" id="clearBtn">Clear all filters</button>
+  </div>
+
+  <div class="panel-form">
+    <div class="search-header">
+      <div class="eyebrow">Discover</div>
+      <h1>Search the marketplace</h1>
+      <div class="search-bar">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="searchInput" placeholder="Search tools, templates, plugins...">
+      </div>
+    </div>
+
+    <div class="sort-row">
+      <div class="result-count"><span id="resultCount">0</span> results</div>
+      <select class="sort-select" id="sortSelect">
+        <option value="relevance">Sort: Relevance</option>
+        <option value="price-asc">Price: Low to High</option>
+        <option value="price-desc">Price: High to Low</option>
+        <option value="rating">Rating</option>
+      </select>
+    </div>
+
+    <div class="results" id="results"></div>
+  </div>
+
+  <script>
+    const items = [
+      { name: 'Codeframe CLI', category: 'Tools', price: 0, rating: 4.8, meta: 'Command-line scaffolder' },
+      { name: 'Nightshift UI Kit', category: 'Templates', price: 49, rating: 4.5, meta: 'Dark-mode component library' },
+      { name: 'Pixel Grid Theme', category: 'Themes', price: 12, rating: 4.1, meta: 'Editor color scheme' },
+      { name: 'AutoLint Plugin', category: 'Plugins', price: 0, rating: 4.6, meta: 'Real-time code linting' },
+      { name: 'Console Dashboard Template', category: 'Templates', price: 79, rating: 4.7, meta: 'Admin panel starter' },
+      { name: 'Terminal Icons Pack', category: 'Themes', price: 8, rating: 3.9, meta: 'Icon set for CLI tools' },
+      { name: 'FormBuilder Pro', category: 'Tools', price: 35, rating: 4.4, meta: 'Drag-and-drop form generator' },
+      { name: 'Sync Plugin for VS Code', category: 'Plugins', price: 15, rating: 4.2, meta: 'Cross-device settings sync' },
+      { name: 'Glasswing Landing Kit', category: 'Templates', price: 99, rating: 4.9, meta: 'Marketing site template' },
+      { name: 'Monospace Font Bundle', category: 'Themes', price: 0, rating: 4.3, meta: '6 coding fonts' },
+      { name: 'API Mock Server', category: 'Tools', price: 25, rating: 4.0, meta: 'Local REST mocking' },
+      { name: 'Git Graph Plugin', category: 'Plugins', price: 0, rating: 4.5, meta: 'Visualize branch history' },
+    ];
+
+    const searchInput = document.getElementById('searchInput');
+    const priceRange = document.getElementById('priceRange');
+    const priceVal = document.getElementById('priceVal');
+    const sortSelect = document.getElementById('sortSelect');
+    const resultsEl = document.getElementById('results');
+    const resultCount = document.getElementById('resultCount');
+    const clearBtn = document.getElementById('clearBtn');
+
+    function getCheckedCategories() {
+      return Array.from(document.querySelectorAll('#categoryFilters input:checked')).map(i => i.value);
+    }
+    function getMinRating() {
+      return parseFloat(document.querySelector('input[name="rating"]:checked').value);
+    }
+
+    function render() {
+      const query = searchInput.value.trim().toLowerCase();
+      const maxPrice = parseInt(priceRange.value);
+      const cats = getCheckedCategories();
+      const minRating = getMinRating();
+
+      let filtered = items.filter(item =>
+        (query === '' || item.name.toLowerCase().includes(query) || item.meta.toLowerCase().includes(query)) &&
+        cats.includes(item.category) &&
+        item.price <= maxPrice &&
+        item.rating >= minRating
+      );
+
+      const sort = sortSelect.value;
+      if (sort === 'price-asc') filtered.sort((a,b) => a.price - b.price);
+      if (sort === 'price-desc') filtered.sort((a,b) => b.price - a.price);
+      if (sort === 'rating') filtered.sort((a,b) => b.rating - a.rating);
+
+      resultCount.textContent = filtered.length;
+
+      if (filtered.length === 0) {
+        resultsEl.innerHTML = '<div class="empty-state">No results match your filters. Try widening your search.</div>';
+        return;
+      }
+
+      resultsEl.innerHTML = filtered.map(item => `
+        <div class="result-card">
+          <div>
+            <div class="result-name">${item.name}</div>
+            <div class="result-meta">${item.category} · ★ ${item.rating.toFixed(1)} · ${item.meta}</div>
+          </div>
+          <div class="result-price">${item.price === 0 ? 'Free' : '$' + item.price}</div>
+        </div>
+      `).join('');
+    }
+
+    priceRange.addEventListener('input', () => {
+      priceVal.textContent = '$' + priceRange.value;
+      render();
+    });
+    searchInput.addEventListener('input', render);
+    sortSelect.addEventListener('change', render);
+    document.querySelectorAll('#categoryFilters input').forEach(cb => cb.addEventListener('change', render));
+    document.querySelectorAll('input[name="rating"]').forEach(r => r.addEventListener('change', render));
+
+    clearBtn.addEventListener('click', () => {
+      searchInput.value = '';
+      priceRange.value = 200;
+      priceVal.textContent = '$200';
+      document.querySelectorAll('#categoryFilters input').forEach(cb => cb.checked = true);
+      document.querySelector('input[name="rating"][value="0"]').checked = true;
+      sortSelect.value = 'relevance';
+      render();
+    });
+
+    render();
+  </script>
+</body>
+</html>
