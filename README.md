@@ -1,4 +1,4 @@
-<img width="1917" height="1077" alt="login-preview" src="https://github.com/user-attachments/assets/8f877cf7-b46d-41ca-8a86-875658c78ed6" /># poc
+# poc
 
 Login and signup forms — proof of concept.
 
